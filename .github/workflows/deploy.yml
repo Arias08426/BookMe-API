@@ -1,0 +1,59 @@
+name: CD Pipeline - Deploy
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run tests before deployment
+      run: |
+        pytest tests/ -v --tb=short
+    
+    - name: Build Docker image
+      run: |
+        docker build -t bookme-api:${{ github.sha }} .
+        docker tag bookme-api:${{ github.sha }} bookme-api:latest
+    
+    # Descomentar y configurar según tu plataforma de deployment
+    # 
+    # - name: Deploy to Production
+    #   env:
+    #     DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+    #   run: |
+    #     # Comandos de deployment aquí
+    #     echo "Deploying to production..."
+    
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          Cambios en esta versión:
+          - Revisa el CHANGELOG.md para más detalles
+        draft: false
+        prerelease: false

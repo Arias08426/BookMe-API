@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: bookme-api
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=BookMe API
+      - APP_VERSION=1.0.0
+      - DATABASE_URL=sqlite:///./data/bookme.db
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    networks:
+      - bookme-network
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: bookme-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - bookme-network
+    command: redis-server --appendonly yes
+
+volumes:
+  redis-data:
+
+networks:
+  bookme-network:
+    driver: bridge
