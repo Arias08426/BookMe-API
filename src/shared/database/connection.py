@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session, sessionmaker
+
 from src.shared.config.settings import get_settings
 
 # Configuración
@@ -9,7 +10,9 @@ settings = get_settings()
 # Motor de base de datos
 engine = create_engine(
     settings.database_url,
-    connect_args={"check_same_thread": False} if "sqlite" in settings.database_url else {}
+    connect_args={"check_same_thread": False}
+    if "sqlite" in settings.database_url
+    else {},
 )
 
 # Sesión de BD
@@ -23,7 +26,7 @@ def get_db() -> Session:
     """
     Generador que proporciona una sesión de base de datos.
     Se usa como dependencia en FastAPI.
-    
+
     Ejemplo:
         @app.get("/users")
         def get_users(db: Session = Depends(get_db)):

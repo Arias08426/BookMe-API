@@ -1,6 +1,7 @@
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
 from src.shared.database.connection import Base
 
 
@@ -12,15 +13,15 @@ def test_db():
     """
     # Crear engine en memoria
     engine = create_engine("sqlite:///:memory:")
-    
+
     # Crear todas las tablas
     Base.metadata.create_all(bind=engine)
-    
+
     # Crear sesión
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     session = TestingSessionLocal()
-    
+
     yield session
-    
+
     # Limpiar después del test
     session.close()

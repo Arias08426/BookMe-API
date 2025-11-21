@@ -1,19 +1,15 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
-from src.shared.database.connection import get_db
-from src.modules.reservations.reservation_service import ReservationService
+
 from src.modules.reservations.reservation_controller import (
-    ReservationController,
-    ReservationCreateRequest,
-    ReservationResponse
-)
+    ReservationController, ReservationCreateRequest, ReservationResponse)
+from src.modules.reservations.reservation_service import ReservationService
+from src.shared.database.connection import get_db
 
 # Router de reservas
-router = APIRouter(
-    prefix="/reservations",
-    tags=["reservations"]
-)
+router = APIRouter(prefix="/reservations", tags=["reservations"])
 
 
 def get_controller(db: Session = Depends(get_db)) -> ReservationController:
@@ -22,20 +18,22 @@ def get_controller(db: Session = Depends(get_db)) -> ReservationController:
     return ReservationController(service)
 
 
-@router.post("/", response_model=ReservationResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/", response_model=ReservationResponse, status_code=status.HTTP_201_CREATED
+)
 def create_reservation(
     request: ReservationCreateRequest,
-    controller: ReservationController = Depends(get_controller)
+    controller: ReservationController = Depends(get_controller),
 ):
     """
     Crea una nueva reserva.
-    
+
     **Reglas de negocio:**
     - startHour debe ser menor que endHour
     - El usuario y la sala deben existir
     - La sala debe estar activa
     - No puede haber solapamiento con otras reservas
-    
+
     **Body:**
     ```json
     {
@@ -55,8 +53,7 @@ def create_reservation(
 
 @router.get("/{reservation_id}", response_model=ReservationResponse)
 def get_reservation(
-    reservation_id: int,
-    controller: ReservationController = Depends(get_controller)
+    reservation_id: int, controller: ReservationController = Depends(get_controller)
 ):
     """
     Obtiene una reserva por su ID.
@@ -71,12 +68,11 @@ def get_reservation(
 # Se podría poner en room_routes.py, pero la dejo aquí por cohesión
 @router.get("/room/{room_id}", response_model=List[ReservationResponse])
 def get_room_reservations(
-    room_id: int,
-    controller: ReservationController = Depends(get_controller)
+    room_id: int, controller: ReservationController = Depends(get_controller)
 ):
     """
     Obtiene todas las reservas de una sala específica.
-    
+
     Útil para ver el historial completo de reservas de una sala.
     """
     try:

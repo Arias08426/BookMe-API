@@ -1,21 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.orm import Session
 from typing import List
-from src.shared.database.connection import get_db
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.orm import Session
+
+from src.modules.rooms.room_controller import (AvailabilityResponse,
+                                               RoomController,
+                                               RoomCreateRequest, RoomResponse,
+                                               RoomUpdateRequest)
 from src.modules.rooms.room_service import RoomService
-from src.modules.rooms.room_controller import (
-    RoomController, 
-    RoomCreateRequest, 
-    RoomUpdateRequest,
-    RoomResponse,
-    AvailabilityResponse
-)
+from src.shared.database.connection import get_db
 
 # Router de salas
-router = APIRouter(
-    prefix="/rooms",
-    tags=["rooms"]
-)
+router = APIRouter(prefix="/rooms", tags=["rooms"])
 
 
 def get_controller(db: Session = Depends(get_db)) -> RoomController:
@@ -26,12 +22,11 @@ def get_controller(db: Session = Depends(get_db)) -> RoomController:
 
 @router.post("/", response_model=RoomResponse, status_code=status.HTTP_201_CREATED)
 def create_room(
-    request: RoomCreateRequest,
-    controller: RoomController = Depends(get_controller)
+    request: RoomCreateRequest, controller: RoomController = Depends(get_controller)
 ):
     """
     Crea una nueva sala.
-    
+
     - **nombre**: Nombre de la sala
     - **capacidad**: Número de personas (mínimo 1)
     - **ubicacion**: Ubicación física
@@ -43,10 +38,7 @@ def create_room(
 
 
 @router.get("/{room_id}", response_model=RoomResponse)
-def get_room(
-    room_id: int,
-    controller: RoomController = Depends(get_controller)
-):
+def get_room(room_id: int, controller: RoomController = Depends(get_controller)):
     """
     Obtiene una sala por su ID.
     """
@@ -57,9 +49,7 @@ def get_room(
 
 
 @router.get("/", response_model=List[RoomResponse])
-def get_all_rooms(
-    controller: RoomController = Depends(get_controller)
-):
+def get_all_rooms(controller: RoomController = Depends(get_controller)):
     """
     Lista todas las salas.
     """
@@ -70,11 +60,11 @@ def get_all_rooms(
 def update_room(
     room_id: int,
     request: RoomUpdateRequest,
-    controller: RoomController = Depends(get_controller)
+    controller: RoomController = Depends(get_controller),
 ):
     """
     Actualiza una sala existente.
-    
+
     Permite modificar todos los campos incluido el estado (activa/inactiva).
     """
     try:
@@ -84,13 +74,10 @@ def update_room(
 
 
 @router.delete("/{room_id}", status_code=status.HTTP_200_OK)
-def delete_room(
-    room_id: int,
-    controller: RoomController = Depends(get_controller)
-):
+def delete_room(room_id: int, controller: RoomController = Depends(get_controller)):
     """
     Elimina una sala.
-    
+
     **Regla**: No se puede eliminar una sala con reservas futuras.
     """
     try:
@@ -103,14 +90,14 @@ def delete_room(
 def get_room_availability(
     room_id: int,
     date: str = Query(..., description="Fecha en formato YYYY-MM-DD"),
-    controller: RoomController = Depends(get_controller)
+    controller: RoomController = Depends(get_controller),
 ):
     """
     Obtiene la disponibilidad de una sala en una fecha específica.
-    
+
     Retorna las horas libres (slots) disponibles para reservar.
     Utiliza caché para optimizar consultas repetidas.
-    
+
     - **date**: Fecha en formato YYYY-MM-DD (ej: 2025-02-19)
     """
     try:

@@ -1,15 +1,15 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
-from src.shared.database.connection import get_db
+
+from src.modules.users.user_controller import (UserController,
+                                               UserCreateRequest, UserResponse)
 from src.modules.users.user_service import UserService
-from src.modules.users.user_controller import UserController, UserCreateRequest, UserResponse
+from src.shared.database.connection import get_db
 
 # Router de usuarios
-router = APIRouter(
-    prefix="/users",
-    tags=["users"]
-)
+router = APIRouter(prefix="/users", tags=["users"])
 
 
 def get_controller(db: Session = Depends(get_db)) -> UserController:
@@ -20,12 +20,11 @@ def get_controller(db: Session = Depends(get_db)) -> UserController:
 
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user(
-    request: UserCreateRequest,
-    controller: UserController = Depends(get_controller)
+    request: UserCreateRequest, controller: UserController = Depends(get_controller)
 ):
     """
     Crea un nuevo usuario.
-    
+
     - **nombre**: Nombre completo del usuario
     - **email**: Email único (no puede estar duplicado)
     """
@@ -36,10 +35,7 @@ def create_user(
 
 
 @router.get("/{user_id}", response_model=UserResponse)
-def get_user(
-    user_id: int,
-    controller: UserController = Depends(get_controller)
-):
+def get_user(user_id: int, controller: UserController = Depends(get_controller)):
     """
     Obtiene un usuario por su ID.
     """
@@ -50,9 +46,7 @@ def get_user(
 
 
 @router.get("/", response_model=List[UserResponse])
-def get_all_users(
-    controller: UserController = Depends(get_controller)
-):
+def get_all_users(controller: UserController = Depends(get_controller)):
     """
     Lista todos los usuarios registrados.
     """

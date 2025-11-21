@@ -1,5 +1,6 @@
-from pydantic_settings import BaseSettings
 from functools import lru_cache
+
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -7,13 +8,14 @@ class Settings(BaseSettings):
     Configuración de la aplicación.
     Lee las variables de entorno del archivo .env
     """
+
     app_name: str = "BookMe API"
     app_version: str = "1.0.0"
     debug: bool = True
     database_url: str = "sqlite:///./bookme.db"
     redis_host: str = "localhost"
     redis_port: int = 6379
-    
+
     class Config:
         env_file = ".env"
         case_sensitive = False

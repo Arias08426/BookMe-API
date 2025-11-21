@@ -12,11 +12,7 @@ exclude =
     *.egg-info
 
 # Códigos de error a ignorar
-ignore = 
-    E203,  # whitespace before ':'
-    E501,  # line too long (manejado por black)
-    W503,  # line break before binary operator
-    E402,  # module level import not at top of file
+ignore = E203, E501, W503, E402
 
 # Configuración de complejidad
 max-complexity = 10
